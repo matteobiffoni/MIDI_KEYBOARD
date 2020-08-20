@@ -67,13 +67,13 @@ int main(void) {
     TCCR4B = (1 << CS42) | (1 << CS40);
     
     char str[128];
-    while(1) {
-        /*main program loop here */
-        /*uint16_t timer_val = TCNT4;
+    /*while(1) {
+        //main program loop here
+        uint16_t timer_val = TCNT4;
         sprintf(str, "Time: %u\n", timer_val);
         UART_sendNote((uint8_t*) str);
-        _delay_ms(1000);*/
-    }
+        _delay_ms(1000);   
+    }*/
 }
 
 
