@@ -4,6 +4,7 @@
 #define __RING_MODULE_H
 
 #include <pthread.h>
+#include <stddef.h>
 
 enum RING_STATE_E {
     SPACE_AVAILABLE = 0,

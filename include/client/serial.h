@@ -3,6 +3,7 @@
 #ifndef __SERIAL_MODULE_H
 #define __SERIAL_MODULE_H
 
+#include <unistd.h>
 #include "../note.h"
 #include "ring.h"
 #include <pthread.h>
@@ -30,6 +31,12 @@ size_t serial_read(serial_context_t*, void *buffer, size_t size);
 
 // Get a single character
 #define serial_read_getChar(ctx, dst) serial_read(ctx, dst, 1)
+
+// Write data to the serial port: returns the number of bytes written or -1
+ssize_t serial_send(serial_context_t*, const void *buffer, size_t size);
+
+// Put a single character
+#define serial_send_putChar(ctx, src) serial_send(ctx, srx, 1)
 
 // Get number of available data
 size_t serial_read_available(serial_context_t*);

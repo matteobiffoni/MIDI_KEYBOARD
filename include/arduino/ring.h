@@ -11,7 +11,7 @@ enum RING_STATE_E {
 }
 
 typedef _ring_s {
-    uint8_t* base;
+    uint8_t *base;
     uint8_t first;
     uint8_t last;
     uint8_t size;
