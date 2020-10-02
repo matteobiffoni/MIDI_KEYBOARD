@@ -17,6 +17,6 @@ Once the program is being executed, there are several actions that can be perfor
 
 * Insert a note name (character: '```c```', '```d```', '```e```', '```f```', '```g```', '```a```', '```b```') and press ```Enter``` to enable that note (insert again to disable)
 * Chords are supported, so multiple notes can be enabled simultaneously
-* To quit the text, insert another character
+* To quit the test, insert another character
 
 Have fun!
