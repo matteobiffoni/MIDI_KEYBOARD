@@ -6,12 +6,13 @@
 #include <unistd.h>
 #include <math.h>
 
-#define SAMPLE_RATE (22050)
+#define SAMPLE_RATE(FREQ) ((FREQ * 100) / 2)
+#define BUF_SIZE (2000)
 #define BIT_REPRESENTATION (4095)
 #define MY_PI (3.14159265359)
 
 #define NOTES (7)
-#define BUFFERS (2)
+#define BUFFERS (4)
 
 ALCdevice *device;
 ALCcontext *context;
@@ -20,16 +21,6 @@ static ALuint buffers[NOTES][BUFFERS], sources[NOTES];
 static pthread_t note_handler_threads[NOTES];
 
 static unsigned quit = 0, start = 0;
-
-static unsigned BUF_SIZES[] = {
-    3034,
-    2854,
-    2140,
-    2148,
-    2700,
-    3106,
-    2500
-};
 
 static unsigned flags[] = {
     0,
@@ -40,7 +31,6 @@ static unsigned flags[] = {
     0,
     0
 };
-
 static float note_frequencies_octave_4[] = {
     261.63f,
     293.66f,
@@ -52,11 +42,13 @@ static float note_frequencies_octave_4[] = {
 };
 
 short* generateWave(int index) {
-    short* result = malloc(sizeof(short) * BUF_SIZES[index]);
-    for(int i = 0; i < BUF_SIZES[index]; i++) {
+    short* result = malloc(sizeof(short) * BUF_SIZE);
+    for(int i = 0; i < BUF_SIZE; i++) {
         result[i] = 0;
-        if(flags[index])
-            result[i] = BIT_REPRESENTATION * sin((2.f * MY_PI * note_frequencies_octave_4[index]) * i / SAMPLE_RATE);
+        if(flags[index]) {
+            float sin_value = sin(((2.f * MY_PI * note_frequencies_octave_4[index]) * i / SAMPLE_RATE(note_frequencies_octave_4[index])));
+            result[i] = BIT_REPRESENTATION * sin_value;
+        }
     }
     return result;
 }
@@ -65,7 +57,7 @@ void *note_handler(void* args) {
     int index = *((int*) args);
     short* samples = generateWave(index);
     for(int i = 0; i < BUFFERS; i++) {
-        alBufferData(buffers[index][i], AL_FORMAT_MONO16, samples, BUF_SIZES[index], SAMPLE_RATE);
+        alBufferData(buffers[index][i], AL_FORMAT_MONO16, samples, BUF_SIZE / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
         alSourceQueueBuffers(sources[index], 1, &buffers[index][i]);
     }
     alSourcePlay(sources[index]);
@@ -81,7 +73,7 @@ void *note_handler(void* args) {
         while(processed) {
             uiProcessed = 0;
             alSourceUnqueueBuffers(sources[index], 1, &uiProcessed);
-            alBufferData(uiProcessed, AL_FORMAT_MONO16, samples, BUF_SIZES[index], SAMPLE_RATE);
+            alBufferData(uiProcessed, AL_FORMAT_MONO16, samples, BUF_SIZE / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
             alSourceQueueBuffers(sources[index], 1, &uiProcessed);
             processed--;
         }
