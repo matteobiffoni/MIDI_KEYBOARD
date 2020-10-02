@@ -5,7 +5,7 @@ This file tests the audio mechanism used for this project, such as OpenAL and it
 In order to execute the test, follow these instructions:
 
 * Open a terminal
-* Run ```sudo apt-get install libopenal```
+* Run ```sudo apt-get install libopenal1```
 * Run ```sudo apt-get install libopenal-dev```
 * Run ```make```
 
