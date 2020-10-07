@@ -1,0 +1,1 @@
+gcc -Wall -I./include -I./include/host ./src/host/main.c ./src/host/communication.c ./src/host/al_handler.c ./src/utils.c ./src/note_event.c -o midi_keyboard -lm -lpthread -lopenal
