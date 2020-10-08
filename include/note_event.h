@@ -3,7 +3,7 @@
 
 // Note event definition
 // Header file
-
+#include <string.h>
 #include <stdint.h> // Needed for <uint8_t>
 #include "utils.h"  // Needed for ^count_set_bits(uint8_t)^
 

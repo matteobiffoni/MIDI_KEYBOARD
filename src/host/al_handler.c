@@ -57,7 +57,6 @@ short* generateWave(int index) {
 void* note_handler(void* args) {
     int index = *((int*) args);
     int buf_size = calc_buf_size(index);
-    printf("BUF_SIZE for handler %d: %d\n", index, buf_size);
     short* samples = generateWave(index);
     for(int i = 0; i < BUFFERS; i++) {
         alBufferData(buffers[index][i], AL_FORMAT_MONO16, samples, buf_size / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));

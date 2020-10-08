@@ -17,11 +17,15 @@ note_event_t craft_note(uint8_t state, uint8_t value) {
 }
 
 uint8_t note_event_as_uint8(note_event_t event) {
-    return *((uint8_t*) &event);
+    uint8_t ret;
+    memcpy(&ret, &event, sizeof(event));
+    return ret;
 }
 
 note_event_t uint8_as_note_event(uint8_t u) {
-    return *((note_event_t*) &u);
+    note_event_t ret;
+    memcpy(&ret, &u, sizeof(u));
+    return ret;
 }
 
 uint8_t get_state(note_event_t event) {
