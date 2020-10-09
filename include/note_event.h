@@ -3,10 +3,12 @@
 
 // Note event definition
 // Header file
-#include <string.h>
+
+#include <string.h> // Needed for ^memcpy()^
 #include <stdint.h> // Needed for <uint8_t>
 #include "utils.h"  // Needed for ^count_set_bits(uint8_t)^
 
+// Note event type definition
 typedef struct _note_event_s {
     uint8_t padding: 3; // 00000XXX
     uint8_t parity: 1;  // 0000X000
@@ -14,11 +16,13 @@ typedef struct _note_event_s {
     uint8_t state: 1;   // X0000000
 } note_event_t;
 
+// Enumeration for note state
 enum NOTE_STATE_ENUM {
     RELEASED = 0b0,
     PRESSED = 0b1
 };
 
+// Enumeration for note value
 enum NOTE_VALUE_ENUM {
     C = 0b001,
     D = 0b010,
@@ -38,10 +42,14 @@ uint8_t note_event_as_uint8(note_event_t);
 // Returns a note event representation of a uint8
 note_event_t uint8_as_note_event(uint8_t);
 
+// Returns the state of a given note event
 uint8_t get_state(note_event_t);
 
+// Returns the value of a given note event
 uint8_t get_value(note_event_t);
 
+// Returns the parity bit computed for a given note event
 uint8_t get_parity(note_event_t);
 
+// Check the consistence of the parity bit of a given note event
 uint8_t check_parity_bit(note_event_t);

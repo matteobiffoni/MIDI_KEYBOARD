@@ -4,10 +4,9 @@
 // Utils implementation
 // Source file
 
-#include "utils.h"
+#include "utils.h"  // Header file
 
-int quit_state = NOT_QUIT;
-
+// Utility to print a byte
 void print_byte(uint8_t u) {
     uint8_t z = 128;
     while(z > 0) {
@@ -18,6 +17,7 @@ void print_byte(uint8_t u) {
     printf("\n");
 }
 
+// Returns the parity bit for given data
 uint8_t compute_parity_bit(uint8_t data) {
     uint8_t parity=0;
     while(data){
@@ -26,7 +26,3 @@ uint8_t compute_parity_bit(uint8_t data) {
     }
     return parity;
 }
-
-/*uint8_t get_nth_bit(uint8_t u, uint8_t n) {
-    return (u << n) & 1;
-}*/

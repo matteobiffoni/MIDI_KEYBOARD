@@ -1,9 +1,18 @@
-#include "communication.h"
+// Project: MIDI KEYBOARD
+// Author:  Matteo Biffoni
 
+// AVR communication protocol implementation
+// Source file
+
+#include "communication.h"      // Header file
+
+
+// Flags to control interrupts
 volatile uint8_t history = 0xFF;
 volatile uint8_t last = 0x00;
 volatile unsigned int notes = 0;
 
+// Initialize the TX communication
 void comm_init(void) {
     UCSR0A = (1 << U2X0); // Double speed transmission, no Multi-Process
     UBRR0H = (uint8_t) (UBRR_VALUE >> 8);
@@ -12,12 +21,14 @@ void comm_init(void) {
     UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1 << RXCIE0);
 }
 
+// Send a note event through TX
 void comm_send(note_event_t event) {
     while(!(UCSR0A & (1 << UDRE0)));
     uint8_t c = note_event_as_uint8(event);
     UDR0 = c;
 }
 
+// Interrupt service routine
 ISR(PCINT0_vect) {
     uint8_t new = PINB ^ history;
     uint8_t note_state;

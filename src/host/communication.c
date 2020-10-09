@@ -4,8 +4,9 @@
 // Communication protocol implementation
 // Source file
 
-#include "communication.h"
+#include "communication.h"      // Header file
 
+// Initialization and setup of the communication with AVR
 uint8_t communication_init_and_setup(void) {
     if(!AVR_DEVICE || *AVR_DEVICE == '\0') {
         fprintf(stderr, "AVR device name invalid\n");
@@ -34,15 +35,13 @@ uint8_t communication_init_and_setup(void) {
         return 1;
     }
     fprintf(stdout, "Baud rate set\n");
+    avr_device.c_cflag &= ~(CRTSCTS | PARENB | CSTOPB | CSIZE);
+    avr_device.c_cflag |= (CS8| CREAD | CLOCAL);
+    avr_device.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHONL | ISIG);
+    avr_device.c_iflag &= ~(IXON | IXOFF | IXANY);
+    avr_device.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
     avr_device.c_iflag &= ~(INPCK);
-    avr_device.c_cflag &= ~(CSIZE);
-    avr_device.c_cflag |= CS8;
-    avr_device.c_cflag |= CREAD;
-    avr_device.c_cflag &= ~(CSTOPB);
-    avr_device.c_cflag &= ~(PARENB);
-    avr_device.c_lflag &= ~(ICANON);
-    avr_device.c_lflag &= ~(ECHO);
-    avr_device.c_cc[VMIN] = 1;
+    avr_device.c_cc[VMIN] = 0;
     avr_device.c_cc[VTIME] = 0;
     if(tcsetattr(avr_device_fd, TCSANOW, &avr_device) != 0) {
         fprintf(stderr, "Error setting attributes of %s\n", AVR_DEVICE);
@@ -53,17 +52,19 @@ uint8_t communication_init_and_setup(void) {
     return 0;
 }
 
+// Non-blocking read: read continously a byte from the AVR
 void *read_routine(void *args) {
     uint8_t byte_read = 0;
     while(!quit_state) {
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
         read(avr_device_fd, &byte_read, 1);
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+        if(!byte_read) continue;
         note_event_t event = uint8_as_note_event(byte_read);
         if(check_parity_bit(event) != 0) {
             quit_state = QUIT_PARITY_ERROR;
         }
-        if(updateFlags(event)) {
+        if(update_flags(event)) {
             quit_state = QUIT_FLAGS_ERROR;
         }
         byte_read = 0;
@@ -71,6 +72,16 @@ void *read_routine(void *args) {
     return NULL;
 }
 
+// Close the communication with AVR
+void communication_close(void) {
+    if(avr_device_fd) {
+        close(avr_device_fd);
+        fprintf(stdout, "Communication protocol closed with %s\n", AVR_DEVICE);
+    }
+    return;
+}
+
+// Function (blocking) that reads the bytes incoming from the AVR
 void start_reading(void) {
     pthread_t read_thread;
     pthread_create(&read_thread, NULL, read_routine, NULL);

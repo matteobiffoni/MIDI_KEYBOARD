@@ -1,9 +1,15 @@
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include "../../../avr_common/uart.h"
+// Project: MIDI KEYBOARD
+// Author:  Matteo Biffoni
 
-#include "communication.h"
+// Main AVR program
+// Source file
 
+#include <avr/io.h>         // Needed for AVR I/O
+#include <avr/interrupt.h>  // Needed for AVR interrupts
+
+#include "communication.h"  // Needed to handle communication with host
+
+// Initial setup of AVR
 static inline void avr_setup(void) {
     DDRB &= ~(
         (1 << DDB0) | 
@@ -36,6 +42,7 @@ static inline void avr_setup(void) {
     sei();
 }
 
+// Main program
 int main(void) {
     comm_init();
     avr_setup();

@@ -4,9 +4,14 @@
 // OpenAL handler implementation
 // Source file
 
-#include "al_handler.h"
+#include "al_handler.h"     // Header file
 
+int quit_state = NOT_QUIT;  // Quit state flag
+
+// Flags to control the notes flow
 unsigned flags[BUFFERS];
+
+// Definition of constant notes frequencies
 const float note_frequencies_octave_4[NOTES] = {
     261.63f,
     293.66f,
@@ -17,11 +22,13 @@ const float note_frequencies_octave_4[NOTES] = {
     493.88f
 };
 
+// Computes the buffer size for a given frequency
 static inline int calc_buf_size(int index) {
     return BUF_SIZE_MIN + (200 * (index + 1));
 }
 
-static inline void printFlags() {
+// Prints the status of notes
+static inline void print_flags() {
     printf("-------FLAGS-------\n");
     printf(" C: %d\n", flags[0]);
     printf(" D: %d\n", flags[1]);
@@ -32,7 +39,8 @@ static inline void printFlags() {
     printf(" B: %d\n", flags[6]);
 }
 
-int updateFlags(note_event_t event) {
+// Update the flags
+int update_flags(note_event_t event) {
     uint8_t state = event.state;
     uint8_t value = event.value;
     if(!value || value > NOTES) return 1;
@@ -41,7 +49,8 @@ int updateFlags(note_event_t event) {
     return 0;
 }
 
-short* generateWave(int index) {
+// Generate a buffer of shorts containing the audio data
+short* generate_wave(int index) {
     int buf_size = calc_buf_size(index);
     short* result = malloc(sizeof(short) * buf_size);
     for(int i = 0; i < buf_size; i++) {
@@ -54,10 +63,11 @@ short* generateWave(int index) {
     return result;
 }
 
+// Note handler routine
 void* note_handler(void* args) {
     int index = *((int*) args);
     int buf_size = calc_buf_size(index);
-    short* samples = generateWave(index);
+    short* samples = generate_wave(index);
     for(int i = 0; i < BUFFERS; i++) {
         alBufferData(buffers[index][i], AL_FORMAT_MONO16, samples, buf_size / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
         alSourceQueueBuffers(sources[index], 1, &buffers[index][i]);
@@ -72,7 +82,7 @@ void* note_handler(void* args) {
         totalProcessed += processed;
         while(processed) {
             uiProcessed = 0;
-            samples = generateWave(index);
+            samples = generate_wave(index);
             alSourceUnqueueBuffers(sources[index], 1, &uiProcessed);
             alBufferData(uiProcessed, AL_FORMAT_MONO16, samples, buf_size / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
             alSourceQueueBuffers(sources[index], 1, &uiProcessed);
@@ -84,6 +94,7 @@ void* note_handler(void* args) {
     return NULL;
 }
 
+// Openal routine
 void* al_handler(void* args) {
     const char *default_device_name = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
     device = alcOpenDevice(default_device_name);
