@@ -55,17 +55,13 @@ In order to compile required files, the *GNU Make* build system is used.
 * If no avr is available, an OpenAL test using PC keyboard (but in a slightly different way: press a key to enable a note, press again to disable) is present at `./test/openal`
 
 ## Further informations
-
-<p align="center">
-  
 ##### Note event structure
 | Field   | Size (bits) | Description |
 |:-------:|:-----------:|:-----------:|
-Padding   |      3      | Zeros needed to reach a byte
-Parity    |      1      | A bit containing the parity checksum for the note event
-Value     |      3      | Represents the pitch this note event refers to (more below)
-State     |      1      | Represents the state of this event (more below)
-
+|Padding   |      3      | Zeros needed to reach a byte|
+|Parity    |      1      | A bit containing the parity checksum for the note event|
+|Value     |      3      | Represents the pitch this note event refers to (more below)|
+|State     |      1      | Represents the state of this event (more below)|
 ###### Note value enumeration
 | Name | Value |
 |:----:|:-----:|
@@ -76,11 +72,8 @@ State     |      1      | Represents the state of this event (more below)
 |G|0x05|
 |A|0x06|
 |B|0x07|
-
 ###### Note state enumeration
 | Name | Value |
 |:----:|:-----:|
 |Released|0x00|
 |Pressed|0x01|
-
-</p>
