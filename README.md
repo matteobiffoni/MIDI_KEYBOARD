@@ -16,11 +16,24 @@ The avr hardware configuration includes:
 * 7 hardware buttons to hold and release notes
 * A bunch of wires to connect the buttons
 
+The buttons must be connected to digital pins of DDRB (from bit `0` to bit `6`)\
+On the ATMega2560 these pins are mapped as:
+
+| PBn |Digital Pin|
+|:---:|:---------:|
+|  0  |     53    |
+|  1  |     52    |
+|  2  |     51    |
+|  3  |     50    |
+|  4  |     10    |
+|  5  |     11    |
+|  6  |     12    |
+
 (An image showing the avr configuration is attached ==> See `arduino_conf.png`)
 
 Every time a button is pressed or released, the avr sends an appropriate note event through the serial and the host receiving it translates this event in an update of the sound production.
 
-The "music" part is implemented with the open-source OpenAL APIs and consists of filling buffers with appropriate data then queueing and unqueueing them to update the sound production.
+The "music" part is implemented with the open-source OpenAL APIs and consists in filling buffers with appropriate data and queueing/unqueueing them to update the sound production.
 
 ## Install
 
@@ -39,20 +52,22 @@ In order to compile required files, the *GNU Make* build system is used.
 * Run `sudo git clone https://github.com/matteobiffoni/MIDI_KEYBOARD.git`
 
 ##### Compile:
-* To compile both avr and host part, make sure to have the avr connected and run `make all`
+* To compile both the avr and the host part, run `make all`
 * To compile only the host part, run `make host`
 * To compile only the avr part, run `make avr`
 
 ##### Execution:
-* If the avr part was compiled, the ATMega2560 should already be running its program
+* Run `make flash` to flash the `.hex` file on the avr. Now the program is running on the microcontroller
 * To execute the host part, run `./target/host/midi_keyboard`
 
 ##### Cleaning:
-* To clean all the `.o` files and the executables, run `make clean`
+* To remove all the `.o` files and the executables, run `make clean`
 
 ##### Notes:
-* Make sure the host has something to reproduce sounds (such as speakers) and has its volume enabled
-* If no avr is available, an OpenAL test using PC keyboard (but in a slightly different way: press a key to enable a note, press again to disable) is present at `./test/openal`
+* Make sure the host is provided with a sound producing peripherial (such as speakers) and has its volume enabled
+* If no avr is available, an OpenAL test using PC keyboard is present at `./test/openal` 
+
+*(Note that in the openal test the notes are enabled/disabled on every key press, while in the avr implementation each key pressure causes the note enabling and each key release causes the note disabling)*
 
 ## Further informations
 ##### Note event structure
@@ -60,8 +75,8 @@ In order to compile required files, the *GNU Make* build system is used.
 |:-------:|:-----------:|:-----------:|
 |Padding   |      3      | Zeros needed to reach a byte|
 |Parity    |      1      | A bit containing the parity checksum for the note event|
-|Value     |      3      | Represents the pitch this note event refers to (more below)|
-|State     |      1      | Represents the state of this event (more below)|
+|Value     |      3      | Represents the pitch this note event refers to (details below)|
+|State     |      1      | Represents the state of this event (details below)|
 ###### Note value enumeration
 | Name | Value |
 |:----:|:-----:|
