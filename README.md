@@ -29,7 +29,7 @@ On the ATMega2560 these pins are mapped as:
 |  5  |     11    |
 |  6  |     12    |
 
-(An image showing the avr configuration is attached ==> See `arduino_conf.png`)
+(An image showing the avr configuration is attached ==> See `avr_conf.png`)
 
 Every time a button is pressed or released, the avr sends an appropriate note event through the serial and the host receiving it translates this event in an update of the sound production.
 
