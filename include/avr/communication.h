@@ -1,22 +1,14 @@
-// Project: MIDI KEYBOARD
-// Author:  Matteo Biffoni
+#include <avr/io.h>         // Needed for AVR I/O
+#include <avr/interrupt.h>  // Needed for AVR interrupts
 
-// AVR communication protocol definition
-// Source file
+#include "note_event.h"
 
-#include <avr/io.h>         // Needed for avr stuff
-#include <avr/interrupt.h>  // Needed for avr interrupts
-
-#include "note_event.h"     // Needed for ^comm_send(note_event_t)^
-
-// Baud rate definition
-#define BAUD_RATE 115200
-// Ubbr value definition
-// 8 because U2X is enabled
+#define BAUD_RATE (115200)
 #define UBRR_VALUE (F_CPU / 8 / BAUD_RATE - 1)
+#define MAX_EVENTS (7)
 
-// Initialize the TX communication
-void comm_init(void);
+void communication_init(void);
 
-// Send a note event through TX
-void comm_send(note_event_t);
+uint8_t communication_send(note_event_t*, size_t);
+
+void communication_reset(void);

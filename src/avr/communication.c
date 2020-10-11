@@ -1,175 +1,52 @@
-// Project: MIDI KEYBOARD
-// Author:  Matteo Biffoni
+#include "communication.h"
 
-// AVR communication protocol implementation
-// Source file
+static inline void tx_sei(void) { UCSR0B |= (1 << TXCIE0); }
+static inline void tx_cli(void) { UCSR0B &= ~(1 << TXCIE0); }
 
-#include "communication.h"      // Header file
+static note_event_t tx_buffer[MAX_EVENTS];
+static uint8_t tx_to_transmit;
+static volatile uint8_t tx_transmitted;
+static volatile uint8_t tx_ongoing;
 
+ISR(USART0_TX_vect) {
+    ++tx_transmitted;
+    if(tx_transmitted < tx_to_transmit)
+        UDR0 = note_event_as_uint8(tx_buffer[tx_transmitted]);
+    else
+        communication_reset();
+}
 
-// Flags to control interrupts
-volatile uint8_t history = 0xFF;
-volatile uint8_t last = 0x00;
-volatile unsigned int notes = 0;
-
-// Initialize the TX communication
-void comm_init(void) {
+void communication_init(void) {
+    // Set baud rate
     UCSR0A = (1 << U2X0); // Double speed transmission, no Multi-Process
     UBRR0H = (uint8_t) (UBRR_VALUE >> 8);
     UBRR0L = (uint8_t) UBRR_VALUE;
+
+    // Set the communication frame width (8 bits for us)
     UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
-    UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1 << RXCIE0);
+
+    // Enable TX
+    // UDRE interrupts are enabled dynamically by 'communication_send()'
+    UCSR0B = (1 << TXEN0);
 }
 
-// Send a note event through TX
-void comm_send(note_event_t event) {
-    while(!(UCSR0A & (1 << UDRE0)));
-    uint8_t c = note_event_as_uint8(event);
-    UDR0 = c;
+uint8_t communication_send(note_event_t* buf, size_t size) {
+    if(!buf || !size || size > MAX_EVENTS) return 1;
+    while(tx_ongoing);
+    tx_ongoing = 1;
+    tx_to_transmit = size;
+    tx_transmitted = 0;
+    for(uint8_t i = 0; i < size; i++)
+        tx_buffer[i] = buf[i];
+    tx_sei();
+    UDR0 = note_event_as_uint8(tx_buffer[0]);
+    return 0;
 }
 
-// Interrupt service routine
-ISR(PCINT0_vect) {
-    uint8_t new = PINB ^ history;
-    uint8_t note_state;
-    uint8_t note_value;
-    char change = 0;
-    if(new & (1 << PINB0)) {
-        note_value = C;
-        if(history & (1 << PINB0)) {
-            if((last & (1 << 0)) == 0) {
-                note_state = PRESSED;
-                last |= (1 << 0);
-                notes++;
-                change = 1;
-            }
-        }
-        else {
-            if((last & (1 << 0)) && notes != 0) {
-                note_state = RELEASED;
-                last &= ~(1 << 0);
-                notes++;
-                change = 1;
-            }
-        }
-    }
-    if(new & (1 << PINB1)) {
-        note_value = D;
-        if(history & (1 << PINB1)) {
-            if((last & (1 << 1)) == 0) {
-                note_state = PRESSED;
-                last |= (1 << 1);
-                notes++;
-                change = 1;
-            }
-        }
-        else {
-            if((last & (1 << 1)) && notes != 0) {
-                note_state = RELEASED;
-                last &= ~(1 << 1);
-                notes++;
-                change = 1;
-            }
-        }
-    }
-    if(new & (1 << PINB2)) {
-        note_value = E;
-        if(history & (1 << PINB2)) {
-            if((last & (1 << 2)) == 0) {
-                note_state = PRESSED;
-                last |= (1 << 2);
-                notes++;
-                change = 1;
-            }
-        }
-        else {
-            if((last & (1 << 2)) && notes != 0) {
-                note_state = RELEASED;
-                last &= ~(1 << 2);
-                notes++;
-                change = 1;
-            }
-        }
-    }
-    if(new & (1 << PINB3)) {
-        note_value = F;
-        if(history & (1 << PINB3)) {
-            if((last & (1 << 3)) == 0) {
-                note_state = PRESSED;
-                last |= (1 << 3);
-                notes++;
-                change = 1;
-            }
-        }
-        else {
-            if((last & (1 << 3)) && notes != 0) {
-                note_state = RELEASED;
-                last &= ~(1 << 3);
-                notes++;
-                change = 1;
-            }
-        }
-    }
-    if(new & (1 << PINB4)) {
-        note_value = G;
-        if(history & (1 << PINB4)) {
-            if((last & (1 << 4)) == 0) {
-                note_state = PRESSED;
-                last |= (1 << 4);
-                notes++;
-                change = 1;
-            }
-        }
-        else {
-            if((last & (1 << 4)) && notes != 0) {
-                note_state = RELEASED;
-                last &= ~(1 << 4);
-                notes++;
-                change = 1;
-            }
-        }
-    }
-    if(new & (1 << PINB5)) {
-        note_value = A;
-        if(history & (1 << PINB5)) {
-            if((last & (1 << 5)) == 0) {
-                note_state = PRESSED;
-                last |= (1 << 5);
-                notes++;
-                change = 1;
-            }
-        }
-        else {
-            if((last & (1 << 5)) && notes != 0)  {
-                note_state = RELEASED;
-                last &= ~(1 << 5);
-                notes++;
-                change = 1;
-            }
-        }
-    }
-    if(new & (1 << PINB6)) {
-        note_value = B;
-        if(history & (1 << PINB6)) {
-            if((last & (1 << 6)) == 0) {
-                note_state = PRESSED;
-                last |= (1 << 6);
-                notes++;
-                change = 1;
-            }
-        }
-        else {
-            if((last & (1 << 6)) && notes != 0) {
-                note_state = RELEASED;
-                last &= ~(1 << 6);
-                notes++;
-                change = 1;
-            }
-        }
-    }
-    history = PINB;
-    if(change) {
-        note_event_t note_event = craft_note(note_state, note_value);
-        comm_send(note_event);
-    }
+void communication_reset(void) {
+    tx_cli();
+    tx_to_transmit = 0;
+    tx_transmitted = 0;
+    tx_ongoing = 0;
 }
+

@@ -21,13 +21,13 @@ avrdude_write_eeprom = -U eeprom:w:$(strip $(1)):i
 
 %.eep:	%.elf
 	avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load"\
-	--change-section-lma .eeprom=0 --no-change-warnings\
-	-O ihex $< $@ || exit 1
+	  --change-section-lma .eeprom=0 --no-change-warnings\
+	  -O ihex $< $@ || exit 1
 
 %.hex:	%.eep %.elf
-	avr-objcopy -O iheax -R .eeprom $(patsubst %.hex, %.elf, $@) $@
+	avr-objcopy -O ihex -R .eeprom $(patsubst %.hex, %.elf, $@) $@
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(call avrdude_write_flash, $@)\
-	$(call avrdude_write_eeprom, $(patsubst %.hex, %.eep, $@))
+	  $(call avrdude_write_eeprom, $(patsubst %.hex, %.eep, $@))
 
 TARGET := target/avr/midi_keyboard.elf
 $(TARGET):	$(OBJECTS)
