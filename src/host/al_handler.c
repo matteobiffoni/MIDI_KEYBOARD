@@ -50,24 +50,22 @@ int update_flags(note_event_t event) {
 }
 
 // Generate a buffer of shorts containing the audio data
-short* generate_wave(int index) {
-    int buf_size = calc_buf_size(index);
-    short* result = malloc(sizeof(short) * buf_size);
+void generate_wave(int index, short* samples, int buf_size) {
     for(int i = 0; i < buf_size; i++) {
-        result[i] = 0;
+        samples[i] = 0;
         if(flags[index]) {
             float sin_value = sin((2.f * MY_PI * note_frequencies_octave_4[index]) * i / SAMPLE_RATE(note_frequencies_octave_4[index])); 
-            result[i] = BIT_REPRESENTATION * sin_value;
+            samples[i] = BIT_REPRESENTATION * sin_value;
         }
     }
-    return result;
 }
 
 // Note handler routine
 void* note_handler(void* args) {
     int index = *((int*) args);
     int buf_size = calc_buf_size(index);
-    short* samples = generate_wave(index);
+    short* samples = malloc(sizeof(short) * buf_size);
+    generate_wave(index, samples, buf_size);
     for(int i = 0; i < BUFFERS; i++) {
         alBufferData(buffers[index][i], AL_FORMAT_MONO16, samples, buf_size / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
         alSourceQueueBuffers(sources[index], 1, &buffers[index][i]);
@@ -82,7 +80,7 @@ void* note_handler(void* args) {
         totalProcessed += processed;
         while(processed) {
             uiProcessed = 0;
-            samples = generate_wave(index);
+            generate_wave(index, samples, buf_size);
             alSourceUnqueueBuffers(sources[index], 1, &uiProcessed);
             alBufferData(uiProcessed, AL_FORMAT_MONO16, samples, buf_size / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
             alSourceQueueBuffers(sources[index], 1, &uiProcessed);

@@ -65,13 +65,13 @@ extern unsigned flags[BUFFERS];
 const float note_frequencies_octave_4[NOTES];
 
 // Update the flags
-int update_flags(note_event_t event);
+int update_flags(note_event_t);
 
 // Generate a buffer of shorts containing the audio data
-short* generate_wave(int index);
+void generate_wave(int, short*, int);
 
 // Note handler routine
-void *note_handler(void* args);
+void *note_handler(void*);
 
 // Openal routine
-void *al_handler(void* args);
+void *al_handler(void*);
