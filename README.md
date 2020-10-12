@@ -31,7 +31,7 @@ On the ATMega2560 these pins are mapped as:
 
 (An image showing the avr configuration is attached ==> See `avr_hardware_conf.png`)
 
-Every time a button is pressed or released, the avr sends an appropriate note event through the serial and the host receiving it translates this event in an update of the sound production.
+Every time a button is pressed or released, the avr sends an appropriate note event through the serial and the receiving host translates this event in an update of the sound production.
 
 The "music" part is implemented with the open-source OpenAL APIs and consists in filling buffers with appropriate data and queueing/unqueueing them to update the sound production.
 
@@ -67,7 +67,7 @@ In order to compile required files, the *GNU Make* build system is used.
 * Make sure the host is provided with a sound producing peripherial (such as speakers) and has its volume enabled
 * If no avr is available, an OpenAL test using PC keyboard is present at `./test/openal` 
 
-*(Note that in the openal test the notes are enabled/disabled on every key press, while in the avr implementation each key pressure causes the note enabling and each key release causes the note disabling)*
+*(Note that in the openal test the notes are enabled/disabled on every key press, whereas in the avr implementation each key pressure causes the note enabling and each key release causes the note disabling)*
 
 ## Further informations
 ##### Note event structure
