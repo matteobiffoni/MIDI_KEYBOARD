@@ -22,7 +22,7 @@
 // Sample rate definition
 #define SAMPLE_RATE(FREQ) (FREQ * 50)
 // Buffer size definition for audio buffers
-#define BUF_SIZE_MIN (3200)
+#define BUF_SIZE (1200)
 // Definition of bit to use for openal
 #define BIT_REPRESENTATION (4095)
 // PI
@@ -68,7 +68,7 @@ const float note_frequencies_octave_4[NOTES];
 int update_flags(note_event_t);
 
 // Generate a buffer of shorts containing the audio data
-void generate_wave(int, short*, int);
+void generate_wave(int, short*);
 
 // Note handler routine
 void *note_handler(void*);

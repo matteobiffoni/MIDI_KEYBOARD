@@ -22,11 +22,6 @@ const float note_frequencies_octave_4[NOTES] = {
     493.88f
 };
 
-// Computes the buffer size for a given frequency
-static inline int calc_buf_size(int index) {
-    return BUF_SIZE_MIN + (200 * (index + 1));
-}
-
 // Prints the status of notes
 static inline void print_flags() {
     printf("-------FLAGS-------\n");
@@ -50,8 +45,8 @@ int update_flags(note_event_t event) {
 }
 
 // Generate a buffer of shorts containing the audio data
-void generate_wave(int index, short* samples, int buf_size) {
-    for(int i = 0; i < buf_size; i++) {
+void generate_wave(int index, short* samples) {
+    for(int i = 0; i < BUF_SIZE; i++) {
         samples[i] = 0;
         if(flags[index]) {
             float sin_value = sin((2.f * MY_PI * note_frequencies_octave_4[index]) * i / SAMPLE_RATE(note_frequencies_octave_4[index])); 
@@ -63,26 +58,25 @@ void generate_wave(int index, short* samples, int buf_size) {
 // Note handler routine
 void* note_handler(void* args) {
     int index = *((int*) args);
-    int buf_size = calc_buf_size(index);
-    short* samples = malloc(sizeof(short) * buf_size);
-    generate_wave(index, samples, buf_size);
+    short* samples = malloc(sizeof(short) * BUF_SIZE);
+    generate_wave(index, samples);
     for(int i = 0; i < BUFFERS; i++) {
-        alBufferData(buffers[index][i], AL_FORMAT_MONO16, samples, buf_size / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
+        alBufferData(buffers[index][i], AL_FORMAT_MONO16, samples, BUF_SIZE * sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
         alSourceQueueBuffers(sources[index], 1, &buffers[index][i]);
     }
     alSourcePlay(sources[index]);
     int processed = 0;
     int totalProcessed = 0;
     while(!quit_state) {
-        usleep(10 * 1000);
+        //usleep(10 * 1000);
         ALuint uiProcessed = 0;
         alGetSourcei(sources[index], AL_BUFFERS_PROCESSED, &processed);
         totalProcessed += processed;
         while(processed) {
             uiProcessed = 0;
-            generate_wave(index, samples, buf_size);
+            generate_wave(index, samples);
             alSourceUnqueueBuffers(sources[index], 1, &uiProcessed);
-            alBufferData(uiProcessed, AL_FORMAT_MONO16, samples, buf_size / sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
+            alBufferData(uiProcessed, AL_FORMAT_MONO16, samples, BUF_SIZE * sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
             alSourceQueueBuffers(sources[index], 1, &uiProcessed);
             processed--;
         }
