@@ -6,8 +6,6 @@
 
 #include <AL/al.h>      // Needed for openal functions
 #include <AL/alc.h>     // Needed for openal functions
-#include <unistd.h>     // Needed for ^usleep()^
-#include <pthread.h>    // Needed for threads
 #include <stdlib.h>     // Needed for ^malloc()^
 #include <math.h>       // Needed for ^sin()^
 
@@ -24,7 +22,7 @@
 // Buffer size definition for audio buffers
 #define BUF_SIZE (1200)
 // Definition of bit to use for openal
-#define BIT_REPRESENTATION (4095)
+#define BIT_REPRESENTATION (8191)
 // PI
 #define MY_PI (3.14159265359)
 
@@ -68,10 +66,7 @@ const float note_frequencies_octave_4[NOTES];
 int update_flags(note_event_t);
 
 // Generate a buffer of shorts containing the audio data
-void generate_wave(int, short*);
-
-// Note handler routine
-void *note_handler(void*);
+void generate_wave(short*, char);
 
 // Openal routine
 void *al_handler(void*);

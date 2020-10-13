@@ -11,6 +11,8 @@ int quit_state = NOT_QUIT;  // Quit state flag
 // Flags to control the notes flow
 unsigned flags[BUFFERS];
 
+short empty_samples[BUF_SIZE], filled_samples[BUF_SIZE];
+
 // Definition of constant notes frequencies
 const float note_frequencies_octave_4[NOTES] = {
     261.63f,
@@ -45,45 +47,14 @@ int update_flags(note_event_t event) {
 }
 
 // Generate a buffer of shorts containing the audio data
-void generate_wave(int index, short* samples) {
+void generate_wave(short* samples, char empty) {
     for(int i = 0; i < BUF_SIZE; i++) {
-        samples[i] = 0;
-        if(flags[index]) {
-            float sin_value = sin((2.f * MY_PI * note_frequencies_octave_4[index]) * i / SAMPLE_RATE(note_frequencies_octave_4[index])); 
+        if(empty) samples[i] = 0;
+        else {
+            float sin_value = sin(2.f * MY_PI * i / 50); 
             samples[i] = BIT_REPRESENTATION * sin_value;
         }
     }
-}
-
-// Note handler routine
-void* note_handler(void* args) {
-    int index = *((int*) args);
-    short* samples = malloc(sizeof(short) * BUF_SIZE);
-    generate_wave(index, samples);
-    for(int i = 0; i < BUFFERS; i++) {
-        alBufferData(buffers[index][i], AL_FORMAT_MONO16, samples, BUF_SIZE * sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
-        alSourceQueueBuffers(sources[index], 1, &buffers[index][i]);
-    }
-    alSourcePlay(sources[index]);
-    int processed = 0;
-    int totalProcessed = 0;
-    while(!quit_state) {
-        //usleep(10 * 1000);
-        ALuint uiProcessed = 0;
-        alGetSourcei(sources[index], AL_BUFFERS_PROCESSED, &processed);
-        totalProcessed += processed;
-        while(processed) {
-            uiProcessed = 0;
-            generate_wave(index, samples);
-            alSourceUnqueueBuffers(sources[index], 1, &uiProcessed);
-            alBufferData(uiProcessed, AL_FORMAT_MONO16, samples, BUF_SIZE * sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[index]));
-            alSourceQueueBuffers(sources[index], 1, &uiProcessed);
-            processed--;
-        }
-    }
-    free(samples);
-    alSourceStop(sources[index]);
-    return NULL;
 }
 
 // Openal routine
@@ -108,25 +79,37 @@ void* al_handler(void* args) {
     alGenSources((ALuint) NOTES, sources);
     for(int i = 0; i < NOTES; i++) {
         alGenBuffers((ALuint) BUFFERS, buffers[i]);
-        int *arg = malloc(sizeof(*arg));
-        if(arg == NULL) {
-            quit_state = QUIT_MEMORY_ALLOCATOR_ERROR;
-            return NULL;
+    }
+    short* empty_samples = malloc(sizeof(short) * BUF_SIZE);
+    short* filled_samples = malloc(sizeof(short) * BUF_SIZE);
+    generate_wave(empty_samples, 1);
+    generate_wave(filled_samples, 0);
+    for(int i = 0; i < NOTES; i++) {
+        for(int j = 0; j < BUFFERS; j++) {
+            alBufferData(buffers[i][j], AL_FORMAT_MONO16, empty_samples, BUF_SIZE * sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[i]));
         }
-        *arg = i;
-        int rc = pthread_create(&note_handler_threads[i], NULL, note_handler, arg);
-        if(rc) {
-            quit_state = QUIT_THREAD_CREATION_ERROR;
-            return NULL;
+        alSourceQueueBuffers(sources[i], BUFFERS, buffers[i]);
+        alSourcePlay(sources[i]);
+    }
+    int processed = 0;
+    ALuint ui_processed = 0;
+    while(!quit_state) {
+        for(int i = 0; i < NOTES; i++) {
+            alGetSourcei(sources[i], AL_BUFFERS_PROCESSED, &processed);
+            while(processed) {
+                alSourceUnqueueBuffers(sources[i], 1, &ui_processed);
+                if(flags[i]) {
+                    alBufferData(ui_processed, AL_FORMAT_MONO16, filled_samples, BUF_SIZE * sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[i]));
+                }
+                else {
+                    alBufferData(ui_processed, AL_FORMAT_MONO16, empty_samples, BUF_SIZE * sizeof(short), SAMPLE_RATE(note_frequencies_octave_4[i]));
+                }
+                alSourceQueueBuffers(sources[i], 1, &ui_processed);
+                processed--;
+            }
         }
     }
-    for(int j = 0; j < NOTES; j++) {
-        int rc = pthread_join(note_handler_threads[j], NULL);
-        if(rc) {
-            quit_state = QUIT_THREAD_JOINING_ERROR;
-            return NULL;
-        }
-    }
+    alDeleteBuffers((ALuint) 1, &ui_processed);
     alSourceStopv((ALuint) NOTES, sources);
     alDeleteSources((ALuint) NOTES, sources);
     for(int k = 0; k < NOTES; k++) {

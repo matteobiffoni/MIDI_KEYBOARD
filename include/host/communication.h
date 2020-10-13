@@ -10,6 +10,7 @@
 #include <sys/types.h>  // Needed for attribute types
 #include <sys/stat.h>   // ""                       ""
 #include <pthread.h>    // Needed for handling multithreading
+#include <unistd.h>     // Needed for ^isatty()^
 
 #include <stdint.h>     // Needed for <uint8_t>
 
