@@ -4,7 +4,7 @@ Project for the exam "Sistemi Operativi", "Università degli Studi di Roma La Sa
 
 Author: **Matteo Biffoni**
 
-Professor: **Giorgio Grisetti**
+Professor: **Giorgio Grisetti**\
 Tutor: **Irvin Aloise**
 
 ## Overview
