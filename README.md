@@ -4,7 +4,7 @@ Project for the exam "Sistemi Operativi", "Università degli Studi di Roma La Sa
 
 Author: **Matteo Biffoni**
 
-Professor: **Giorgio Grisetti**\
+Professor: **Giorgio Grisetti**
 Tutor: **Irvin Aloise**
 
 ## Overview
@@ -16,7 +16,7 @@ The avr hardware configuration includes:
 * 7 hardware buttons to hold and release notes
 * A bunch of wires to connect the buttons
 
-The buttons must be connected to digital pins of DDRB (from bit `0` to bit `6`)\
+The buttons must be connected to digital pins of DDRB (from bit `0` to bit `6`)
 On the ATMega2560 these pins are mapped as:
 
 | PBn |Digital Pin|
@@ -65,30 +65,35 @@ In order to compile required files, the *GNU Make* build system is used.
 
 ##### Notes:
 * Make sure the host is provided with a sound producing peripherial (such as speakers) and has its volume enabled
-* If no avr is available, an OpenAL test using PC keyboard is present at `./test/openal` 
+* If no avr is available, an OpenAL test using PC keyboard is present at `./test_openal` 
 
 *(Note that in the openal test the notes are enabled/disabled on every key press, whereas in the avr implementation each key pressure causes the note enabling and each key release causes the note disabling)*
 
 ## Further informations
 ##### Note event structure
-| Field   | Size (bits) | Description |
-|:-------:|:-----------:|:-----------:|
-|Padding   |      3      | Zeros needed to reach a byte|
-|Parity    |      1      | A bit containing the parity checksum for the note event|
-|Value     |      3      | Represents the pitch this note event refers to (details below)|
-|State     |      1      | Represents the state of this event (details below)|
+
+| Field   | Size (bits) |                           Description                          |
+|:-------:|:-----------:|:--------------------------------------------------------------:|
+|Padding  |      3      |                 Zeros needed to reach a byte                   |
+|Parity   |      1      |     A bit containing the parity checksum for the note event    |
+|Value    |      3      | Represents the pitch this note event refers to (details below) |
+|State    |      1      |         Represents the state of this event (details below)     |
+
 ###### Note value enumeration
+
 | Name | Value |
 |:----:|:-----:|
-|C|0x01|
-|D|0x02|
-|E|0x03|
-|F|0x04|
-|G|0x05|
-|A|0x06|
-|B|0x07|
+|   C  |  0x01 |
+|   D  |  0x02 |
+|   E  |  0x03 |
+|   F  |  0x04 |
+|   G  |  0x05 |
+|   A  |  0x06 |
+|   B  |  0x07 |
+
 ###### Note state enumeration
-| Name | Value |
-|:----:|:-----:|
-|Released|0x00|
-|Pressed|0x01|
+
+|  Name  | Value |
+|:------:|:-----:|
+|Released|  0x00 |
+|Pressed |  0x01 |
