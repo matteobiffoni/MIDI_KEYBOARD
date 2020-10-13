@@ -72,6 +72,7 @@ In order to compile required files, the *GNU Make* build system is used.
 ## Further informations
 ##### Note event structure
 
+
 | Field   | Size (bits) |                           Description                          |
 |:-------:|:-----------:|:--------------------------------------------------------------:|
 |Padding  |      3      |                 Zeros needed to reach a byte                   |
