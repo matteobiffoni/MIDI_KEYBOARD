@@ -19,7 +19,7 @@ uint8_t communication_init_and_setup(void) {
     }
     if(!isatty(avr_device_fd)) {
         close(avr_device_fd);
-        fprintf(stderr, "%s is note a TTY device\n", AVR_DEVICE);
+        fprintf(stderr, "%s is not a TTY device\n", AVR_DEVICE);
         return 1;
     }
     fprintf(stdout, "Connected with %s\n", AVR_DEVICE);

@@ -80,8 +80,6 @@ void* al_handler(void* args) {
     for(int i = 0; i < NOTES; i++) {
         alGenBuffers((ALuint) BUFFERS, buffers[i]);
     }
-    short* empty_samples = malloc(sizeof(short) * BUF_SIZE);
-    short* filled_samples = malloc(sizeof(short) * BUF_SIZE);
     generate_wave(empty_samples, 1);
     generate_wave(filled_samples, 0);
     for(int i = 0; i < NOTES; i++) {
